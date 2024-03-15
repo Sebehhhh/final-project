@@ -3,8 +3,9 @@ package controllers
 import (
 	"net/http"
 
+	"final-project-golang/models"
+
 	"github.com/gin-gonic/gin"
-	"github.com/wpcodevo/golang-gorm-postgres/models"
 	"gorm.io/gorm"
 )
 

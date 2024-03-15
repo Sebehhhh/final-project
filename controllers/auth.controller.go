@@ -6,10 +6,11 @@ import (
 	"strings"
 	"time"
 
+	"final-project-golang/initializers"
+	"final-project-golang/models"
+	"final-project-golang/utils"
+
 	"github.com/gin-gonic/gin"
-	"github.com/wpcodevo/golang-gorm-postgres/initializers"
-	"github.com/wpcodevo/golang-gorm-postgres/models"
-	"github.com/wpcodevo/golang-gorm-postgres/utils"
 	"gorm.io/gorm"
 )
 
