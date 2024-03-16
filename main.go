@@ -20,8 +20,8 @@ var (
 	UserController      controllers.UserController
 	UserRouteController routes.UserRouteController
 
-	PostController      controllers.PostController
-	PostRouteController routes.PostRouteController
+	PhotoController      controllers.PhotoController
+	PhotoRouteController routes.PhotoRouteController
 )
 
 func init() {
@@ -38,8 +38,8 @@ func init() {
 	UserController = controllers.NewUserController(initializers.DB)
 	UserRouteController = routes.NewRouteUserController(UserController)
 
-	PostController = controllers.NewPostController(initializers.DB)
-	PostRouteController = routes.NewRoutePostController(PostController)
+	PhotoController = controllers.NewPhotoController(initializers.DB)
+	PhotoRouteController = routes.NewRoutePhotoController(PhotoController)
 
 	server = gin.Default()
 }
@@ -64,6 +64,6 @@ func main() {
 
 	AuthRouteController.AuthRoute(router)
 	UserRouteController.UserRoute(router)
-	PostRouteController.PostRoute(router)
+	PhotoRouteController.PhotoRoute(router)
 	log.Fatal(server.Run(":" + config.ServerPort))
 }

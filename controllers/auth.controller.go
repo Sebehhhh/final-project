@@ -22,7 +22,6 @@ func NewAuthController(DB *gorm.DB) AuthController {
 	return AuthController{DB}
 }
 
-// SignUp User
 func (ac *AuthController) SignUpUser(ctx *gin.Context) {
 	var payload *models.SignUpInput
 
@@ -44,13 +43,10 @@ func (ac *AuthController) SignUpUser(ctx *gin.Context) {
 
 	now := time.Now()
 	newUser := models.User{
-		Name:      payload.Name,
+		Username:  payload.Username,
 		Email:     strings.ToLower(payload.Email),
 		Password:  hashedPassword,
-		Role:      "user",
-		Verified:  true,
-		Photo:     payload.Photo,
-		Provider:  "local",
+		Age:       payload.Age,
 		CreatedAt: now,
 		UpdatedAt: now,
 	}
@@ -67,14 +63,13 @@ func (ac *AuthController) SignUpUser(ctx *gin.Context) {
 
 	userResponse := &models.UserResponse{
 		ID:        newUser.ID,
-		Name:      newUser.Name,
+		Username:  newUser.Username,
 		Email:     newUser.Email,
-		Photo:     newUser.Photo,
-		Role:      newUser.Role,
-		Provider:  newUser.Provider,
+		Age:       newUser.Age,
 		CreatedAt: newUser.CreatedAt,
 		UpdatedAt: newUser.UpdatedAt,
 	}
+
 	ctx.JSON(http.StatusCreated, gin.H{"status": "success", "data": gin.H{"user": userResponse}})
 }
 
@@ -120,7 +115,6 @@ func (ac *AuthController) SignInUser(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "access_token": access_token})
 }
 
-// Refresh Access Token
 func (ac *AuthController) RefreshAccessToken(ctx *gin.Context) {
 	message := "could not refresh access token"
 
