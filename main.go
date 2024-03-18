@@ -77,5 +77,7 @@ func main() {
 	AuthRouteController.AuthRoute(router)
 	UserRouteController.UserRoute(router)
 	PhotoRouteController.PhotoRoute(router)
+	CommentRouteController.CommentRoute(router)
+	SocialMediaRouteController.SocialMediaRoute(router)
 	log.Fatal(server.Run(":" + config.ServerPort))
 }
