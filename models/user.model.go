@@ -13,9 +13,9 @@ type User struct {
 	ProfileImageURL string `gorm:"type:text"`
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
-	Photos          []Photo
-	Comments        []Comment
-	SocialMedias    []SocialMedia
+	Photos          []Photo       `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+	Comments        []Comment     `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+	SocialMedias    []SocialMedia `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 }
 
 type SignUpInput struct {
