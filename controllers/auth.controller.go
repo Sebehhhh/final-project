@@ -57,17 +57,15 @@ func (ac *AuthController) SignUpUser(ctx *gin.Context) {
 		return
 	}
 
-	userResponse := &models.UserResponse{
-		ID:              newUser.ID,
-		Username:        newUser.Username,
-		Email:           newUser.Email,
-		Age:             newUser.Age,
-		ProfileImageURL: newUser.ProfileImageURL,
-		CreatedAt:       newUser.CreatedAt,
-		UpdatedAt:       newUser.UpdatedAt,
+	userResponse := gin.H{
+		"id":                newUser.ID,
+		"email":             newUser.Email,
+		"username":          newUser.Username,
+		"age":               newUser.Age,
+		"profile_image_url": newUser.ProfileImageURL,
 	}
 
-	ctx.JSON(http.StatusCreated, gin.H{"status": "success", "data": gin.H{"user": userResponse}})
+	ctx.JSON(http.StatusCreated, gin.H{"status": "success", "data": userResponse})
 }
 
 func (ac *AuthController) SignInUser(ctx *gin.Context) {

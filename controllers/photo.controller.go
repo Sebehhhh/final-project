@@ -67,25 +67,33 @@ func (pc *PhotoController) UpdatePhoto(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
+
 	var updatedPhoto models.Photo
 	result := pc.DB.First(&updatedPhoto, "id = ?", photoID)
 	if result.Error != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": "No photo with that ID exists"})
 		return
 	}
+
 	now := time.Now()
-	photoToUpdate := models.Photo{
-		Title:     payload.Title,
-		Caption:   payload.Caption,
-		PhotoURL:  payload.PhotoURL,
-		UserID:    currentUser.ID,
-		CreatedAt: updatedPhoto.CreatedAt,
-		UpdatedAt: now,
+	updatedPhoto.Title = payload.Title
+	updatedPhoto.Caption = payload.Caption
+	updatedPhoto.PhotoURL = payload.PhotoURL
+	updatedPhoto.UserID = currentUser.ID
+	updatedPhoto.UpdatedAt = now
+
+	pc.DB.Save(&updatedPhoto)
+
+	// Mengonversi data yang diperbarui menjadi respons sesuai dengan spesifikasi OpenAPI
+	responseData := gin.H{
+		"id":        updatedPhoto.ID,
+		"caption":   updatedPhoto.Caption,
+		"title":     updatedPhoto.Title,
+		"photo_url": updatedPhoto.PhotoURL,
+		"user_id":   updatedPhoto.UserID,
 	}
 
-	pc.DB.Model(&updatedPhoto).Updates(photoToUpdate)
-
-	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": updatedPhoto})
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": responseData})
 }
 
 func (pc *PhotoController) FindPhotoByID(ctx *gin.Context) {
@@ -98,7 +106,16 @@ func (pc *PhotoController) FindPhotoByID(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": photo})
+	// Membuat objek JSON yang sesuai dengan spesifikasi OpenAPI
+	responseData := gin.H{
+		"id":        photo.ID,
+		"caption":   photo.Caption,
+		"title":     photo.Title,
+		"photo_url": photo.PhotoURL,
+		"user_id":   photo.UserID,
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": responseData})
 }
 
 func (pc *PhotoController) FindPhotos(ctx *gin.Context) {
@@ -116,7 +133,19 @@ func (pc *PhotoController) FindPhotos(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"status": "success", "results": len(photos), "data": photos})
+	// Membuat slice untuk menyimpan hasil response yang sesuai dengan spesifikasi OpenAPI
+	var responseData []gin.H
+	for _, photo := range photos {
+		responseData = append(responseData, gin.H{
+			"id":        photo.ID,
+			"caption":   photo.Caption,
+			"title":     photo.Title,
+			"photo_url": photo.PhotoURL,
+			"user_id":   photo.UserID,
+		})
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": responseData})
 }
 
 func (pc *PhotoController) DeletePhoto(ctx *gin.Context) {
@@ -124,10 +153,10 @@ func (pc *PhotoController) DeletePhoto(ctx *gin.Context) {
 
 	result := pc.DB.Delete(&models.Photo{}, "id = ?", photoID)
 
-	if result.Error != nil {
+	if result.RowsAffected == 0 {
 		ctx.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": "No photo with that ID exists"})
 		return
 	}
 
-	ctx.JSON(http.StatusNoContent, nil)
+	ctx.JSON(http.StatusOK, gin.H{"status": "success"})
 }

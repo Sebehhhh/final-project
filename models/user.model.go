@@ -2,6 +2,8 @@ package models
 
 import (
 	"time"
+
+	"github.com/go-playground/validator/v10"
 )
 
 type User struct {
@@ -23,7 +25,7 @@ type SignUpInput struct {
 	Email           string `json:"email" binding:"required"`
 	Password        string `json:"password" binding:"required,min=8"`
 	Age             int    `json:"age" binding:"required"`
-	ProfileImageURL string `json:"profile_image_url"`
+	ProfileImageURL string `json:"profile_image_url" validate:"omitempty,url"`
 }
 
 type SignInInput struct {
@@ -39,4 +41,9 @@ type UserResponse struct {
 	CreatedAt       time.Time `json:"created_at"`
 	UpdatedAt       time.Time `json:"updated_at"`
 	ProfileImageURL string    `json:"profile_image_url,omitempty"`
+}
+
+func ValidateSignUpInput(input SignUpInput) error {
+	validate := validator.New()
+	return validate.Struct(input)
 }

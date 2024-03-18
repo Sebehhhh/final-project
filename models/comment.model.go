@@ -16,14 +16,10 @@ type Comment struct {
 }
 
 type CreateCommentRequest struct {
-	UserID    int64     `json:"user_id,omitempty"`
-	PhotoID   int64     `json:"photo_id,omitempty"`
-	Message   string    `json:"message,omitempty"`
-	CreatedAt time.Time `json:"created_at,omitempty"`
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	PhotoID int64  `json:"photo_id" validate:"required"`
+	Message string `json:"message" validate:"required"`
 }
 
 type UpdateCommentRequest struct {
-	Message   string    `json:"message,omitempty"`
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	Message string `json:"message" validate:"required"`
 }
