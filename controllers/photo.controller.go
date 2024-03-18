@@ -25,7 +25,7 @@ func (pc *PhotoController) CreatePhoto(ctx *gin.Context) {
 	var payload *models.CreatePhotoRequest
 
 	if err := ctx.ShouldBindJSON(&payload); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
 
@@ -42,14 +42,20 @@ func (pc *PhotoController) CreatePhoto(ctx *gin.Context) {
 	result := pc.DB.Create(&newPhoto)
 	if result.Error != nil {
 		if strings.Contains(result.Error.Error(), "duplicate key") {
-			ctx.JSON(http.StatusConflict, gin.H{"status": "fail", "message": "Photo with that title already exists"})
+			ctx.JSON(http.StatusConflict, gin.H{"message": "Photo with that title already exists"})
 			return
 		}
-		ctx.JSON(http.StatusBadGateway, gin.H{"status": "error", "message": result.Error.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Unexpected error"})
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, gin.H{"status": "success", "data": newPhoto})
+	ctx.JSON(http.StatusCreated, gin.H{
+		"id":        newPhoto.ID,
+		"caption":   newPhoto.Caption,
+		"title":     newPhoto.Title,
+		"photo_url": newPhoto.PhotoURL,
+		"user_id":   newPhoto.UserID,
+	})
 }
 
 func (pc *PhotoController) UpdatePhoto(ctx *gin.Context) {

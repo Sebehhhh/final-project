@@ -2,16 +2,14 @@ package models
 
 import (
 	"time"
-
-	"github.com/google/uuid"
 )
 
 type SocialMedia struct {
-	ID             uuid.UUID `gorm:"primaryKey"`
-	Name           string
-	SocialMediaURL string
-	UserID         uuid.UUID // Foreign Key
-	User           User      `gorm:"foreignKey:UserID"`
+	ID             int64  `gorm:"primaryKey"`
+	Name           string `gorm:"size:50;not null"`
+	SocialMediaURL string `gorm:"type:text;not null"`
+	UserID         int64  `gorm:"not null"`
+	User           User   `gorm:"foreignKey:UserID"`
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 }
@@ -19,7 +17,7 @@ type SocialMedia struct {
 type CreateSocialMediaRequest struct {
 	Name           string    `json:"name,omitempty"`
 	SocialMediaURL string    `json:"social_media_url,omitempty"`
-	UserID         uuid.UUID `json:"user_id,omitempty"`
+	UserID         int64     `json:"user_id,omitempty"`
 	CreatedAt      time.Time `json:"created_at,omitempty"`
 	UpdatedAt      time.Time `json:"updated_at,omitempty"`
 }
