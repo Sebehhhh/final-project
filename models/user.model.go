@@ -43,6 +43,18 @@ type UserResponse struct {
 	ProfileImageURL string    `json:"profile_image_url,omitempty"`
 }
 
+type UpdateCurrentUserRequest struct {
+	Username        string `json:"username" binding:"required"`
+	Email           string `json:"email" binding:"required"`
+	Age             int    `json:"age" binding:"required"`
+	ProfileImageURL string `json:"profile_image_url,omitempty" validate:"omitempty,url"`
+}
+
+func ValidateUpdateCurrentUserRequest(input UpdateCurrentUserRequest) error {
+	validate := validator.New()
+	return validate.Struct(input)
+}
+
 func ValidateSignUpInput(input SignUpInput) error {
 	validate := validator.New()
 	return validate.Struct(input)

@@ -30,3 +30,48 @@ func (uc *UserController) GetMe(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": gin.H{"user": userResponse}})
 }
+
+func (uc *UserController) UpdateMe(ctx *gin.Context) {
+	currentUser := ctx.MustGet("currentUser").(models.User)
+	var payload models.UpdateCurrentUserRequest
+
+	if err := ctx.ShouldBindJSON(&payload); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	// Update current user information
+	currentUser.Username = payload.Username
+	currentUser.Email = payload.Email
+	currentUser.Age = payload.Age
+	currentUser.ProfileImageURL = payload.ProfileImageURL
+
+	// Simpan perubahan ke dalam database
+	if err := uc.DB.Save(&currentUser).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to update user information"})
+		return
+	}
+
+	// Siapkan respons sesuai spesifikasi OpenAPI
+	responseData := gin.H{
+		"id":                currentUser.ID,
+		"email":             currentUser.Email,
+		"username":          currentUser.Username,
+		"age":               currentUser.Age,
+		"profile_image_url": currentUser.ProfileImageURL,
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": responseData})
+}
+
+func (uc *UserController) DeleteMe(ctx *gin.Context) {
+	currentUser := ctx.MustGet("currentUser").(models.User)
+
+	// Hapus pengguna saat ini dari database
+	if err := uc.DB.Delete(&currentUser).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to delete user"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"status": "success"})
+}
