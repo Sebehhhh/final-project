@@ -50,8 +50,8 @@ func init() {
 	CommentController = controllers.NewCommentController(initializers.DB)
 	CommentRouteController = routes.NewRouteCommentController(CommentController)
 
-	PhotoController = controllers.NewPhotoController(initializers.DB)
-	PhotoRouteController = routes.NewRoutePhotoController(PhotoController)
+	SocialMediaController = controllers.NewSocialMediaController(initializers.DB)
+	SocialMediaRouteController = routes.NewRouteSocialMediaController(SocialMediaController)
 
 	server = gin.Default()
 }
