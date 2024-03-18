@@ -8,7 +8,7 @@ import (
 
 type AuthRouteController struct {
 	authController controllers.AuthController
-	userController controllers.UserController // Tambahkan kontroler pengguna di sini
+	userController controllers.UserController
 }
 
 func NewAuthRouteController(authController controllers.AuthController, userController controllers.UserController) AuthRouteController {

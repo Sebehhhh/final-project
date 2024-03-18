@@ -22,6 +22,12 @@ var (
 
 	PhotoController      controllers.PhotoController
 	PhotoRouteController routes.PhotoRouteController
+
+	CommentController      controllers.CommentController
+	CommentRouteController routes.CommentRouteController
+
+	SocialMediaController      controllers.SocialMediaController
+	SocialMediaRouteController routes.SocialMediaRouteController
 )
 
 func init() {
@@ -33,10 +39,16 @@ func init() {
 	initializers.ConnectDB(&config)
 
 	AuthController = controllers.NewAuthController(initializers.DB)
-	AuthRouteController = routes.NewAuthRouteController(AuthController)
+	AuthRouteController = routes.NewAuthRouteController(AuthController, UserController)
 
 	UserController = controllers.NewUserController(initializers.DB)
 	UserRouteController = routes.NewRouteUserController(UserController)
+
+	PhotoController = controllers.NewPhotoController(initializers.DB)
+	PhotoRouteController = routes.NewRoutePhotoController(PhotoController)
+
+	CommentController = controllers.NewCommentController(initializers.DB)
+	CommentRouteController = routes.NewRouteCommentController(CommentController)
 
 	PhotoController = controllers.NewPhotoController(initializers.DB)
 	PhotoRouteController = routes.NewRoutePhotoController(PhotoController)
