@@ -74,10 +74,10 @@ func main() {
 		ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": message})
 	})
 
-	AuthRouteController.AuthRoute(router)
-	UserRouteController.UserRoute(router)
-	PhotoRouteController.PhotoRoute(router)
-	CommentRouteController.CommentRoute(router)
-	SocialMediaRouteController.SocialMediaRoute(router)
+	AuthRouteController.AuthRoute(&server.RouterGroup)
+	UserRouteController.UserRoute(&server.RouterGroup)
+	PhotoRouteController.PhotoRoute(&server.RouterGroup)
+	CommentRouteController.CommentRoute(&server.RouterGroup)
+	SocialMediaRouteController.SocialMediaRoute(&server.RouterGroup)
 	log.Fatal(server.Run(":" + config.ServerPort))
 }

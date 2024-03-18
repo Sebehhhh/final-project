@@ -2,8 +2,6 @@ package models
 
 import (
 	"time"
-
-	"github.com/go-playground/validator/v10"
 )
 
 type SocialMedia struct {
@@ -18,20 +16,10 @@ type SocialMedia struct {
 
 type CreateSocialMediaRequest struct {
 	Name           string `json:"name" validate:"required"`
-	SocialMediaURL string `json:"social_media_url" validate:"required,url"`
+	SocialMediaURL string `json:"social_media_url" validate:"required"`
 }
 
 type UpdateSocialMediaRequest struct {
 	Name           string `json:"name" validate:"required"`
-	SocialMediaURL string `json:"social_media_url" validate:"required,url"`
-}
-
-func ValidateCreateSocialMediaRequest(input CreateSocialMediaRequest) error {
-	validate := validator.New()
-	return validate.Struct(input)
-}
-
-func ValidateUpdateSocialMediaRequest(input UpdateSocialMediaRequest) error {
-	validate := validator.New()
-	return validate.Struct(input)
+	SocialMediaURL string `json:"social_media_url" validate:"required"`
 }

@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"final-project-golang/models"
+	"final-project-golang/utils"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -36,7 +37,31 @@ func (uc *UserController) UpdateMe(ctx *gin.Context) {
 	var payload models.UpdateCurrentUserRequest
 
 	if err := ctx.ShouldBindJSON(&payload); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+		return
+	}
+
+	// Validasi email
+	if !utils.IsValidEmail(payload.Email) {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Invalid email format"})
+		return
+	}
+
+	// Validasi username
+	if payload.Username == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Username is required"})
+		return
+	}
+
+	// Validasi age
+	if payload.Age < 8 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Age must be at least 8"})
+		return
+	}
+
+	// Validasi URL profil
+	if payload.ProfileImageURL != "" && !utils.IsValidURL(payload.ProfileImageURL) {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Invalid profile image URL format"})
 		return
 	}
 

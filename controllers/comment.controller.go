@@ -27,6 +27,12 @@ func (cc *CommentController) CreateComment(ctx *gin.Context) {
 		return
 	}
 
+	// Validasi field message
+	if payload.Message == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Message is required"})
+		return
+	}
+
 	now := time.Now()
 	newComment := models.Comment{
 		Message:   payload.Message,
@@ -99,6 +105,12 @@ func (cc *CommentController) UpdateComment(ctx *gin.Context) {
 	var payload models.UpdateCommentRequest
 	if err := ctx.ShouldBindJSON(&payload); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	// Validasi field message
+	if payload.Message == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Message is required"})
 		return
 	}
 

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"final-project-golang/models"
+	"final-project-golang/utils"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -26,6 +27,24 @@ func (pc *PhotoController) CreatePhoto(ctx *gin.Context) {
 
 	if err := ctx.ShouldBindJSON(&payload); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	// Validasi field title
+	if payload.Title == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Title is required"})
+		return
+	}
+
+	// Validasi field photo_url
+	if payload.PhotoURL == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Photo URL is required"})
+		return
+	}
+
+	// Validasi URL profil
+	if payload.PhotoURL != "" && !utils.IsValidURL(payload.PhotoURL) {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Invalid profile image URL format"})
 		return
 	}
 
@@ -65,6 +84,24 @@ func (pc *PhotoController) UpdatePhoto(ctx *gin.Context) {
 	var payload *models.UpdatePhoto
 	if err := ctx.ShouldBindJSON(&payload); err != nil {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
+		return
+	}
+
+	// Validasi field title
+	if payload.Title == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Title is required"})
+		return
+	}
+
+	// Validasi field photo_url
+	if payload.PhotoURL == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Photo URL is required"})
+		return
+	}
+
+	// Validasi URL profil
+	if payload.PhotoURL != "" && !utils.IsValidURL(payload.PhotoURL) {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Invalid profile image URL format"})
 		return
 	}
 

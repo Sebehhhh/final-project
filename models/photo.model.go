@@ -2,8 +2,6 @@ package models
 
 import (
 	"time"
-
-	"github.com/go-playground/validator/v10"
 )
 
 type Photo struct {
@@ -21,21 +19,11 @@ type Photo struct {
 type CreatePhotoRequest struct {
 	Title    string `json:"title" binding:"required"`
 	Caption  string `json:"caption,omitempty"`
-	PhotoURL string `json:"photo_url" binding:"required,url"`
+	PhotoURL string `json:"photo_url" binding:"required"`
 }
 
 type UpdatePhoto struct {
 	Title    string `json:"title" validate:"required"`
 	Caption  string `json:"caption,omitempty"`
-	PhotoURL string `json:"photo_url" validate:"required,url"`
-}
-
-func ValidateCreatePhotoRequest(input CreatePhotoRequest) error {
-	validate := validator.New()
-	return validate.Struct(input)
-}
-
-func ValidateUpdatePhoto(input UpdatePhoto) error {
-	validate := validator.New()
-	return validate.Struct(input)
+	PhotoURL string `json:"photo_url" validate:"required"`
 }

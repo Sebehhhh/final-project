@@ -30,6 +30,47 @@ func (ac *AuthController) SignUpUser(ctx *gin.Context) {
 		return
 	}
 
+	// Validasi email
+	if !utils.IsValidEmail(payload.Email) {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Invalid email format"})
+		return
+	}
+
+	// Validasi email unik
+	var existingUser models.User
+	if ac.DB.Where("email = ?", strings.ToLower(payload.Email)).First(&existingUser).RowsAffected != 0 {
+		ctx.JSON(http.StatusConflict, gin.H{"status": "fail", "message": "User with that email already exists"})
+		return
+	}
+
+	// Validasi username
+	if payload.Username == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Username is required"})
+		return
+	}
+	if ac.DB.Where("username = ?", payload.Username).First(&existingUser).RowsAffected != 0 {
+		ctx.JSON(http.StatusConflict, gin.H{"status": "fail", "message": "Username already exists"})
+		return
+	}
+
+	// Validasi password
+	if len(payload.Password) < 6 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Password must be at least 6 characters long"})
+		return
+	}
+
+	// Validasi age
+	if payload.Age < 8 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Age must be at least 8"})
+		return
+	}
+
+	// Validasi URL profil
+	if payload.ProfileImageURL != "" && !utils.IsValidURL(payload.ProfileImageURL) {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Invalid profile image URL format"})
+		return
+	}
+
 	hashedPassword, err := utils.HashPassword(payload.Password)
 	if err != nil {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "error", "message": err.Error()})
@@ -49,10 +90,7 @@ func (ac *AuthController) SignUpUser(ctx *gin.Context) {
 
 	result := ac.DB.Create(&newUser)
 
-	if result.Error != nil && strings.Contains(result.Error.Error(), "duplicate key value violates unique") {
-		ctx.JSON(http.StatusConflict, gin.H{"status": "fail", "message": "User with that email already exists"})
-		return
-	} else if result.Error != nil {
+	if result.Error != nil {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "error", "message": "Something bad happened"})
 		return
 	}

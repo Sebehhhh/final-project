@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"final-project-golang/models"
+	"final-project-golang/utils"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -24,6 +25,24 @@ func (smc *SocialMediaController) CreateSocialMedia(ctx *gin.Context) {
 
 	if err := ctx.ShouldBindJSON(&payload); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	// Validasi field name
+	if payload.Name == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Name is required"})
+		return
+	}
+
+	// Validasi field social_media_url
+	if payload.SocialMediaURL == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Social media URL is required"})
+		return
+	}
+
+	// Validasi URL profil
+	if payload.SocialMediaURL != "" && !utils.IsValidURL(payload.SocialMediaURL) {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Invalid profile image URL format"})
 		return
 	}
 
@@ -79,6 +98,24 @@ func (smc *SocialMediaController) UpdateSocialMedia(ctx *gin.Context) {
 	var payload models.UpdateSocialMediaRequest
 	if err := ctx.ShouldBindJSON(&payload); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	// Validasi field name
+	if payload.Name == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Name is required"})
+		return
+	}
+
+	// Validasi field social_media_url
+	if payload.SocialMediaURL == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Social media URL is required"})
+		return
+	}
+
+	// Validasi URL profil
+	if payload.SocialMediaURL != "" && !utils.IsValidURL(payload.SocialMediaURL) {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Invalid profile image URL format"})
 		return
 	}
 
