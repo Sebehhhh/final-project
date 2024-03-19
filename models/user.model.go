@@ -31,15 +31,15 @@ type SignInInput struct {
 	Password string `json:"password"  binding:"required"`
 }
 
-type UserResponse struct {
-	ID              int64     `json:"id,omitempty"`
-	Username        string    `json:"username,omitempty"`
-	Email           string    `json:"email,omitempty"`
-	Age             int       `json:"age,omitempty"`
-	CreatedAt       time.Time `json:"created_at"`
-	UpdatedAt       time.Time `json:"updated_at"`
-	ProfileImageURL string    `json:"profile_image_url,omitempty"`
-}
+// type UserResponse struct {
+// 	ID              int64     `json:"id,omitempty"`
+// 	Username        string    `json:"username,omitempty"`
+// 	Email           string    `json:"email,omitempty"`
+// 	Age             int       `json:"age,omitempty"`
+// 	CreatedAt       time.Time `json:"created_at"`
+// 	UpdatedAt       time.Time `json:"updated_at"`
+// 	ProfileImageURL string    `json:"profile_image_url,omitempty"`
+// }
 
 type UpdateCurrentUserRequest struct {
 	Username        string `json:"username" binding:"required"`
