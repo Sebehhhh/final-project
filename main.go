@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"net/http"
 
 	"final-project-golang/controllers"
 	"final-project-golang/initializers"
@@ -67,12 +66,6 @@ func main() {
 	corsConfig.AllowCredentials = true
 
 	server.Use(cors.New(corsConfig))
-
-	router := server.Group("/api")
-	router.GET("/healthchecker", func(ctx *gin.Context) {
-		message := "Welcome to Golang with Gorm and Postgres"
-		ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": message})
-	})
 
 	AuthRouteController.AuthRoute(&server.RouterGroup)
 	UserRouteController.UserRoute(&server.RouterGroup)
