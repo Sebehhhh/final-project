@@ -3,7 +3,7 @@ services:
     image: postgres
     container_name: postgres
     ports:
-      - 6500:51027
+      - 6500:44278
     env_file:
       - ./app.env
     volumes:
