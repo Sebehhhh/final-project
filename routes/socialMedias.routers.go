@@ -20,6 +20,7 @@ func (smc *SocialMediaRouteController) SocialMediaRoute(rg *gin.RouterGroup) {
 	router.Use(middleware.DeserializeUser())
 	router.POST("", smc.socialMediaController.CreateSocialMedia)
 	router.GET("", smc.socialMediaController.GetSocialMedias)
+	router.GET("/:socialMediaId", smc.socialMediaController.GetSocialMediaByID)
 	router.PUT("/:socialMediaId", smc.socialMediaController.UpdateSocialMedia)
 	router.DELETE("/:socialMediaId", smc.socialMediaController.DeleteSocialMedia)
 }

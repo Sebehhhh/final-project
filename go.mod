@@ -3,10 +3,9 @@ module final-project-golang
 go 1.21.5
 
 require (
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-contrib/cors v1.5.0
 	github.com/gin-gonic/gin v1.9.1
-	github.com/google/uuid v1.6.0
+	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/spf13/viper v1.18.2
 	golang.org/x/crypto v0.19.0
 	gorm.io/driver/postgres v1.5.6

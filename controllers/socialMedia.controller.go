@@ -68,11 +68,11 @@ func (smc *SocialMediaController) CreateSocialMedia(ctx *gin.Context) {
 		"user_id":          newSocialMedia.UserID,
 	})
 }
-
 func (smc *SocialMediaController) GetSocialMedias(ctx *gin.Context) {
 	currentUser := ctx.MustGet("currentUser").(models.User)
+
 	var socialMedias []models.SocialMedia
-	result := smc.DB.Where("user_id = ?", currentUser.ID).Find(&socialMedias)
+	result := smc.DB.Preload("User").Where("user_id = ?", currentUser.ID).Find(&socialMedias)
 	if result.Error != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Unexpected error"})
 		return
@@ -86,14 +86,45 @@ func (smc *SocialMediaController) GetSocialMedias(ctx *gin.Context) {
 			"name":             socialMedia.Name,
 			"social_media_url": socialMedia.SocialMediaURL,
 			"user_id":          socialMedia.UserID,
+			"user": gin.H{
+				"id":       socialMedia.User.ID,
+				"email":    socialMedia.User.Email,
+				"username": socialMedia.User.Username,
+			},
 		})
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": responseData})
 }
 
+func (smc *SocialMediaController) GetSocialMediaByID(ctx *gin.Context) {
+	socialMediaID := ctx.Param("socialMediaId")
+
+	var socialMedia models.SocialMedia
+	result := smc.DB.Preload("User").First(&socialMedia, "id = ?", socialMediaID)
+	if result.Error != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"message": "No social media entry with that ID exists"})
+		return
+	}
+
+	// Membuat objek JSON yang sesuai dengan spesifikasi OpenAPI
+	responseData := gin.H{
+		"id":               socialMedia.ID,
+		"name":             socialMedia.Name,
+		"social_media_url": socialMedia.SocialMediaURL,
+		"user_id":          socialMedia.UserID,
+		"user": gin.H{
+			"id":       socialMedia.User.ID,
+			"email":    socialMedia.User.Email,
+			"username": socialMedia.User.Username,
+		},
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": responseData})
+}
 func (smc *SocialMediaController) UpdateSocialMedia(ctx *gin.Context) {
 	socialMediaID := ctx.Param("socialMediaId")
+	currentUser := ctx.MustGet("currentUser").(models.User)
 
 	var payload models.UpdateSocialMediaRequest
 	if err := ctx.ShouldBindJSON(&payload); err != nil {
@@ -114,7 +145,7 @@ func (smc *SocialMediaController) UpdateSocialMedia(ctx *gin.Context) {
 	}
 
 	// Validasi URL profil
-	if payload.SocialMediaURL != "" && !utils.IsValidURL(payload.SocialMediaURL) {
+	if !utils.IsValidURL(payload.SocialMediaURL) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Invalid profile image URL format"})
 		return
 	}
@@ -123,6 +154,12 @@ func (smc *SocialMediaController) UpdateSocialMedia(ctx *gin.Context) {
 	result := smc.DB.First(&updatedSocialMedia, "id = ?", socialMediaID)
 	if result.Error != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{"message": "No social media with that ID exists"})
+		return
+	}
+
+	// Periksa apakah pengguna yang sedang masuk adalah pemilik dari entri media sosial yang akan diperbarui
+	if updatedSocialMedia.UserID != currentUser.ID {
+		ctx.JSON(http.StatusForbidden, gin.H{"message": "You are not authorized to update this social media entry"})
 		return
 	}
 
@@ -143,8 +180,22 @@ func (smc *SocialMediaController) UpdateSocialMedia(ctx *gin.Context) {
 
 func (smc *SocialMediaController) DeleteSocialMedia(ctx *gin.Context) {
 	socialMediaID := ctx.Param("socialMediaId")
+	currentUser := ctx.MustGet("currentUser").(models.User)
 
-	result := smc.DB.Delete(&models.SocialMedia{}, "id = ?", socialMediaID)
+	var socialMedia models.SocialMedia
+	result := smc.DB.First(&socialMedia, "id = ?", socialMediaID)
+	if result.Error != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"message": "No social media with that ID exists"})
+		return
+	}
+
+	// Periksa apakah pengguna yang sedang masuk adalah pemilik dari entri media sosial yang akan dihapus
+	if socialMedia.UserID != currentUser.ID {
+		ctx.JSON(http.StatusForbidden, gin.H{"message": "You are not authorized to delete this social media entry"})
+		return
+	}
+
+	result = smc.DB.Delete(&socialMedia)
 	if result.RowsAffected == 0 {
 		ctx.JSON(http.StatusNotFound, gin.H{"message": "No social media with that ID exists"})
 		return

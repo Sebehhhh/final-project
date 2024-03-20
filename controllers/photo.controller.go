@@ -99,9 +99,9 @@ func (pc *PhotoController) UpdatePhoto(ctx *gin.Context) {
 		return
 	}
 
-	// Validasi URL profil
-	if payload.PhotoURL != "" && !utils.IsValidURL(payload.PhotoURL) {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Invalid profile image URL format"})
+	// Validasi URL foto
+	if !utils.IsValidURL(payload.PhotoURL) {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Invalid photo URL format"})
 		return
 	}
 
@@ -112,11 +112,16 @@ func (pc *PhotoController) UpdatePhoto(ctx *gin.Context) {
 		return
 	}
 
+	// Periksa apakah pengguna yang sedang masuk adalah pemilik foto yang akan diperbarui
+	if updatedPhoto.UserID != currentUser.ID {
+		ctx.JSON(http.StatusForbidden, gin.H{"status": "fail", "message": "You are not authorized to update this photo"})
+		return
+	}
+
 	now := time.Now()
 	updatedPhoto.Title = payload.Title
 	updatedPhoto.Caption = payload.Caption
 	updatedPhoto.PhotoURL = payload.PhotoURL
-	updatedPhoto.UserID = currentUser.ID
 	updatedPhoto.UpdatedAt = now
 
 	pc.DB.Save(&updatedPhoto)
@@ -143,6 +148,10 @@ func (pc *PhotoController) FindPhotoByID(ctx *gin.Context) {
 		return
 	}
 
+	// Ambil informasi pengguna yang terkait dengan foto dari basis data
+	user := models.User{}
+	pc.DB.First(&user, photo.UserID)
+
 	// Membuat objek JSON yang sesuai dengan spesifikasi OpenAPI
 	responseData := gin.H{
 		"id":        photo.ID,
@@ -150,11 +159,15 @@ func (pc *PhotoController) FindPhotoByID(ctx *gin.Context) {
 		"title":     photo.Title,
 		"photo_url": photo.PhotoURL,
 		"user_id":   photo.UserID,
+		"user": gin.H{
+			"id":       user.ID,
+			"email":    user.Email,
+			"username": user.Username,
+		},
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": responseData})
 }
-
 func (pc *PhotoController) FindPhotos(ctx *gin.Context) {
 	var page = ctx.DefaultQuery("page", "1")
 	var limit = ctx.DefaultQuery("limit", "10")
@@ -173,12 +186,20 @@ func (pc *PhotoController) FindPhotos(ctx *gin.Context) {
 	// Membuat slice untuk menyimpan hasil response yang sesuai dengan spesifikasi OpenAPI
 	var responseData []gin.H
 	for _, photo := range photos {
+		user := models.User{}            // Deklarasikan variabel untuk menyimpan informasi pengguna
+		pc.DB.First(&user, photo.UserID) // Ambil informasi pengguna dari basis data berdasarkan ID yang terkait dengan foto
+
 		responseData = append(responseData, gin.H{
 			"id":        photo.ID,
 			"caption":   photo.Caption,
 			"title":     photo.Title,
 			"photo_url": photo.PhotoURL,
 			"user_id":   photo.UserID,
+			"user": gin.H{
+				"id":       user.ID,
+				"email":    user.Email,
+				"username": user.Username,
+			},
 		})
 	}
 
@@ -187,8 +208,24 @@ func (pc *PhotoController) FindPhotos(ctx *gin.Context) {
 
 func (pc *PhotoController) DeletePhoto(ctx *gin.Context) {
 	photoID := ctx.Param("photoId")
+	currentUser := ctx.MustGet("currentUser").(models.User)
 
-	result := pc.DB.Delete(&models.Photo{}, "id = ?", photoID)
+	var photo models.Photo
+	result := pc.DB.First(&photo, "id = ?", photoID)
+
+	if result.Error != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": "No photo with that ID exists"})
+		return
+	}
+
+	// Check if the current user is the owner of the photo
+	if photo.UserID != currentUser.ID {
+		ctx.JSON(http.StatusForbidden, gin.H{"status": "fail", "message": "You are not authorized to delete this photo"})
+		return
+	}
+
+	// Delete the photo from the database
+	result = pc.DB.Delete(&photo)
 
 	if result.RowsAffected == 0 {
 		ctx.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": "No photo with that ID exists"})
