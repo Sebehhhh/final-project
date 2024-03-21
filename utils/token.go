@@ -23,7 +23,7 @@ func CreateToken(ttl time.Duration, payload interface{}, privateKey string) (str
 
 	claims := make(jwt.MapClaims)
 	claims["sub"] = payload
-	claims["exp"] = now.Add(ttl).Unix()
+	claims["exp"] = now.Add(time.Hour).Unix()
 	claims["iat"] = now.Unix()
 	claims["nbf"] = now.Unix()
 
