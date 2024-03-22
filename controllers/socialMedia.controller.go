@@ -106,6 +106,8 @@ func (smc *SocialMediaController) GetSocialMediaByID(ctx *gin.Context) {
 		ctx.JSON(http.StatusNotFound, gin.H{"message": "No social media entry with that ID exists"})
 		return
 	}
+	user := models.User{}
+	smc.DB.First(&user, socialMedia.UserID)
 
 	// Membuat objek JSON yang sesuai dengan spesifikasi OpenAPI
 	responseData := gin.H{
@@ -122,6 +124,7 @@ func (smc *SocialMediaController) GetSocialMediaByID(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": responseData})
 }
+
 func (smc *SocialMediaController) UpdateSocialMedia(ctx *gin.Context) {
 	socialMediaID := ctx.Param("socialMediaId")
 	currentUser := ctx.MustGet("currentUser").(models.User)
