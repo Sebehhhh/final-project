@@ -71,6 +71,19 @@ func (uc *UserController) UpdateMe(ctx *gin.Context) {
 	currentUser.Age = payload.Age
 	currentUser.ProfileImageURL = payload.ProfileImageURL
 
+	// Validasi Unik Username
+	existingUser := models.User{}
+	if err := uc.DB.Where("username = ?", payload.Username).First(&existingUser).Error; err == nil && existingUser.ID != currentUser.ID {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Username is already taken"})
+		return
+	}
+
+	// Validasi Unik Email
+	if err := uc.DB.Where("email = ?", payload.Email).First(&existingUser).Error; err == nil && existingUser.ID != currentUser.ID {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Email is already taken"})
+		return
+	}
+
 	// Simpan perubahan ke dalam database
 	if err := uc.DB.Save(&currentUser).Error; err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to update user information"})
